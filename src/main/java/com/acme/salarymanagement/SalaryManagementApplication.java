@@ -1,4 +1,4 @@
-package com.acme.salary_management;
+package com.acme.salarymanagement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

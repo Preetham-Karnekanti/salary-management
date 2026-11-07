@@ -1,7 +1,5 @@
 package com.acme.salarymanagement.entity;
 
-import com.acme.salarymanagement.entity.Country;
-import com.acme.salarymanagement.entity.Department;
 import com.acme.salarymanagement.enums.EmploymentStatus;
 
 import jakarta.persistence.*;

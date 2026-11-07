@@ -30,7 +30,6 @@ public class EmployeeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // Get employee by ID
     @GetMapping("/{employeeId}")
     public ResponseEntity<EmployeeResponse> getEmployeeById(
             @PathVariable Long employeeId) {
@@ -40,7 +39,6 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
-    // Get all employees with pagination and sorting
     @GetMapping
     public ResponseEntity<Page<EmployeeResponse>> getAllEmployees(
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
@@ -50,7 +48,6 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
-    // Update employee
     @PutMapping("/{employeeId}")
     public ResponseEntity<EmployeeResponse> updateEmployee(
             @PathVariable Long employeeId,

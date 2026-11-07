@@ -1,5 +1,6 @@
 package com.acme.salarymanagement.dto.employee;
 
+import com.acme.salarymanagement.dto.salary.SalaryResponse;
 import com.acme.salarymanagement.enums.EmploymentStatus;
 
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ public record EmployeeResponse(
         String departmentName,
         String jobTitle,
         EmploymentStatus employmentStatus,
-        LocalDate hireDate
+        LocalDate hireDate,
+        SalaryResponse currentSalary
 ) {
 }

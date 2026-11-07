@@ -1,6 +1,8 @@
 package com.acme.salarymanagement.dto.employee;
 
+import com.acme.salarymanagement.dto.salary.SalaryRequest;
 import com.acme.salarymanagement.enums.EmploymentStatus;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
@@ -38,6 +40,11 @@ public record EmployeeRequest(
 
         @NotNull
         @PastOrPresent
-        LocalDate hireDate
+        LocalDate hireDate,
+
+        @NotNull
+        @Valid
+        SalaryRequest salary
+
 ) {
 }

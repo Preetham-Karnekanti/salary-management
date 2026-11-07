@@ -7,6 +7,7 @@ import com.acme.salarymanagement.dto.employee.EmployeeResponse;
 import com.acme.salarymanagement.entity.Country;
 import com.acme.salarymanagement.entity.Department;
 import com.acme.salarymanagement.entity.Employee;
+import com.acme.salarymanagement.entity.Salary;
 import com.acme.salarymanagement.mapper.EmployeeMapper;
 import com.acme.salarymanagement.repository.CountryRepository;
 import com.acme.salarymanagement.repository.DepartmentRepository;
@@ -19,6 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -28,8 +32,13 @@ public class EmployeeService {
     private final CountryRepository countryRepository;
     private final DepartmentRepository departmentRepository;
     private final EmployeeMapper employeeMapper;
+    private final SalaryService salaryService;
 
     public EmployeeResponse createEmployee(EmployeeRequest request) {
+
+        if (request.salary() == null) {
+            throw new IllegalArgumentException("Initial salary is required");
+        }
 
         validateUniqueFields(request, null);
 
@@ -43,23 +52,40 @@ public class EmployeeService {
 
         Employee savedEmployee = employeeRepository.save(employee);
 
-        return employeeMapper.toResponse(savedEmployee);
+        Salary salary = salaryService.createInitialSalary(savedEmployee, request.salary());
+
+        return employeeMapper.toResponse(savedEmployee, salary);
     }
 
     @Transactional(readOnly = true)
     public EmployeeResponse getEmployeeById(Long employeeId) {
 
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Employee not found"));
 
-        return employeeMapper.toResponse(employee);
+        Salary currentSalary = salaryService.getCurrentSalary(employeeId);
+
+        return employeeMapper.toResponse(employee, currentSalary);
     }
 
     @Transactional(readOnly = true)
     public Page<EmployeeResponse> getAllEmployees(Pageable pageable) {
+        Page<Employee> employeePage = employeeRepository.findAll(pageable);
 
-        return employeeRepository.findAll(pageable)
-                .map(employeeMapper::toResponse);
+        List<Long> employeeIds = employeePage.getContent()
+                .stream()
+                .map(Employee::getId)
+                .toList();
+
+        Map<Long, Salary> salaryMap = salaryService.getCurrentSalaries(employeeIds);
+
+        return employeePage.map(employee ->
+                employeeMapper.toResponse(
+                        employee,
+                        salaryMap.get(employee.getId())
+                )
+        );
     }
 
     public EmployeeResponse updateEmployee(Long employeeId, EmployeeRequest request) {
@@ -79,7 +105,15 @@ public class EmployeeService {
 
         Employee updatedEmployee = employeeRepository.save(employee);
 
-        return employeeMapper.toResponse(updatedEmployee);
+        Salary currentSalary = salaryService.getCurrentSalary(employeeId);
+
+        if (request.salary() != null &&
+                salaryService.hasSalaryChanged(currentSalary, request.salary())) {
+
+            currentSalary = salaryService.updateSalary(employeeId, request.salary());
+        }
+
+        return employeeMapper.toResponse(updatedEmployee, currentSalary);
     }
 
     private void validateUniqueFields(EmployeeRequest request, Long employeeId) {

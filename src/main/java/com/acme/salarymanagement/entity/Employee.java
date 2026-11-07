@@ -9,6 +9,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "employees")
@@ -72,4 +74,8 @@ public class Employee {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Salary> salaries = new ArrayList<>();
 }

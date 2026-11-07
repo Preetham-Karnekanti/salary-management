@@ -5,11 +5,15 @@ import com.acme.salarymanagement.dto.employee.EmployeeResponse;
 import com.acme.salarymanagement.entity.Country;
 import com.acme.salarymanagement.entity.Department;
 import com.acme.salarymanagement.entity.Employee;
+import com.acme.salarymanagement.entity.Salary;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class EmployeeMapper {
 
+    private final SalaryMapper salaryMapper;
     public Employee toEntity(
             EmployeeRequest request,
             Country country,
@@ -28,7 +32,7 @@ public class EmployeeMapper {
                 .build();
     }
 
-    public EmployeeResponse toResponse(Employee employee) {
+    public EmployeeResponse toResponse(Employee employee, Salary salary) {
         return new EmployeeResponse(
                 employee.getId(),
                 employee.getEmployeeCode(),
@@ -41,7 +45,8 @@ public class EmployeeMapper {
                 employee.getDepartment().getName(),
                 employee.getJobTitle(),
                 employee.getEmploymentStatus(),
-                employee.getHireDate()
+                employee.getHireDate(),
+                salaryMapper.toResponse(salary)
         );
     }
 

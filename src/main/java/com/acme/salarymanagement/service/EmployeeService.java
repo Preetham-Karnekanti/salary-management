@@ -1,5 +1,7 @@
 package com.acme.salarymanagement.service;
 
+import com.acme.salarymanagement.common.exception.DuplicateResourceException;
+import com.acme.salarymanagement.common.exception.ResourceNotFoundException;
 import com.acme.salarymanagement.dto.employee.EmployeeRequest;
 import com.acme.salarymanagement.dto.employee.EmployeeResponse;
 import com.acme.salarymanagement.entity.Country;
@@ -32,10 +34,10 @@ public class EmployeeService {
         validateUniqueFields(request, null);
 
         Country country = countryRepository.findById(request.countryId())
-                .orElseThrow(() -> new RuntimeException("Country not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Country not found"));
 
         Department department = departmentRepository.findById(request.departmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
         Employee employee = employeeMapper.toEntity(request, country, department);
 
@@ -48,7 +50,7 @@ public class EmployeeService {
     public EmployeeResponse getEmployeeById(Long employeeId) {
 
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         return employeeMapper.toResponse(employee);
     }
@@ -63,15 +65,15 @@ public class EmployeeService {
     public EmployeeResponse updateEmployee(Long employeeId, EmployeeRequest request) {
 
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         validateUniqueFields(request, employeeId);
 
         Country country = countryRepository.findById(request.countryId())
-                .orElseThrow(() -> new RuntimeException("Country not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Country not found"));
 
         Department department = departmentRepository.findById(request.departmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
         employeeMapper.updateEntity(employee, request, country, department);
 
@@ -85,13 +87,13 @@ public class EmployeeService {
         employeeRepository.findByEmployeeCode(request.employeeCode())
                 .filter(existing -> !existing.getId().equals(employeeId))
                 .ifPresent(existing -> {
-                    throw new RuntimeException("Employee code already exists");
+                    throw new DuplicateResourceException("Employee code already exists");
                 });
 
         employeeRepository.findByEmail(request.email())
                 .filter(existing -> !existing.getId().equals(employeeId))
                 .ifPresent(existing -> {
-                    throw new RuntimeException("Email already exists");
+                    throw new DuplicateResourceException("Email already exists");
                 });
     }
 }

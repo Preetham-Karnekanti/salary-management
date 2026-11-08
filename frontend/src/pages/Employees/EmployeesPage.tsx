@@ -5,12 +5,16 @@ import {
   Alert,
   Box,
   Button,
+  Snackbar,
   Typography,
 } from '@mui/material';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import axios from 'axios';
 
 import EmployeeTable from '@/pages/Employees/components/EmployeeTable';
 import EmployeeFilters from '@/pages/Employees/components/EmployeeFilters';
 import EmployeeDetailsDialog from '@/pages/Employees/components/EmployeeDetailsDialog';
+import EmployeeFormDialog from '@/pages/Employees/components/EmployeeFormDialog';
 
 import { useEmployees } from '@/pages/Employees/hooks/useEmployees';
 
@@ -19,6 +23,8 @@ import {
   getDepartments,
   type ReferenceOption,
 } from '@/api/referenceDataApi';
+import { createEmployee } from '@/api/employeeApi';
+import type { EmployeeCreateRequest } from '@/types/employee';
 
 function EmployeesPage() {
   const {
@@ -42,12 +48,19 @@ function EmployeesPage() {
   const [referenceDataError, setReferenceDataError] =
     useState<string | null>(null);
 
+  // Employee details dialog state
   const [selectedEmployeeId, setSelectedEmployeeId] =
     useState<number | null>(null);
 
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  // Load reference data for the filters.
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Success notification state
+  const [successOpen, setSuccessOpen] = useState(false);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -82,14 +95,65 @@ function EmployeesPage() {
     };
   }, []);
 
+  // Open employee details
   const handleViewEmployee = (employeeId: number) => {
     setSelectedEmployeeId(employeeId);
     setDetailsOpen(true);
   };
 
+  // Close employee details
   const handleCloseDetails = () => {
     setDetailsOpen(false);
     setSelectedEmployeeId(null);
+  };
+
+  // Open employee creation dialog
+  const handleOpenCreateDialog = () => {
+    setSubmitError(null);
+    setCreateDialogOpen(true);
+  };
+
+  // Close employee creation dialog
+  const handleCloseCreateDialog = () => {
+    if (submitting) {
+      return;
+    }
+
+    setCreateDialogOpen(false);
+    setSubmitError(null);
+  };
+
+  // Create employee
+  const handleCreateEmployee = async (
+    request: EmployeeCreateRequest
+  ) => {
+    try {
+      setSubmitting(true);
+      setSubmitError(null);
+
+      await createEmployee(request);
+
+      setCreateDialogOpen(false);
+
+      // Refresh the existing employee listing.
+      refresh();
+
+      // Display success notification.
+      setSuccessOpen(true);
+    } catch (error: unknown) {
+      let message = 'Failed to create employee. Please try again.';
+
+      if (axios.isAxiosError<{ message?: string }>(error)) {
+        message =
+          error.response?.data?.message ?? error.message ?? message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      setSubmitError(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -125,21 +189,37 @@ function EmployeesPage() {
           </Typography>
         </Box>
 
-        <Typography
-          variant="body2"
+        <Box
           sx={{
-            color: 'text.secondary',
-            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            flexWrap: 'wrap',
           }}
         >
-          {totalElements.toLocaleString()} Employees
-        </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            fontWeight={600}
+          >
+            {totalElements.toLocaleString()} Employees
+          </Typography>
+
+          <Button
+            variant="contained"
+            startIcon={<AddRoundedIcon />}
+            onClick={handleOpenCreateDialog}
+          >
+            Add Employee
+          </Button>
+        </Box>
       </Box>
 
       {/* Reference data error */}
       {referenceDataError && (
         <Alert severity="error">
-          Unable to load country and department options: {referenceDataError}
+          Unable to load country and department options:{' '}
+          {referenceDataError}
         </Alert>
       )}
 
@@ -188,6 +268,39 @@ function EmployeesPage() {
         employeeId={selectedEmployeeId}
         onClose={handleCloseDetails}
       />
+
+      <EmployeeFormDialog
+        open={createDialogOpen}
+        countries={countries}
+        departments={departments}
+        submitting={submitting}
+        submitError={submitError}
+        onClose={handleCloseCreateDialog}
+        onSubmit={handleCreateEmployee}
+      />
+
+      <Snackbar
+        open={successOpen}
+        autoHideDuration={4000}
+        onClose={(_, reason) => {
+          if (reason !== 'clickaway') {
+            setSuccessOpen(false);
+          }
+        }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+      >
+        <Alert
+          onClose={() => setSuccessOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Employee created successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

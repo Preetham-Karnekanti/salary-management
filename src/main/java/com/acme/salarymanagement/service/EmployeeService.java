@@ -2,8 +2,10 @@ package com.acme.salarymanagement.service;
 
 import com.acme.salarymanagement.common.exception.DuplicateResourceException;
 import com.acme.salarymanagement.common.exception.ResourceNotFoundException;
+import com.acme.salarymanagement.dto.employee.EmployeeDetailsResponse;
 import com.acme.salarymanagement.dto.employee.EmployeeRequest;
 import com.acme.salarymanagement.dto.employee.EmployeeResponse;
+import com.acme.salarymanagement.dto.salary.SalaryResponse;
 import com.acme.salarymanagement.entity.Country;
 import com.acme.salarymanagement.entity.Department;
 import com.acme.salarymanagement.entity.Employee;
@@ -24,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class EmployeeService {
 
@@ -33,6 +34,14 @@ public class EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final EmployeeMapper employeeMapper;
     private final SalaryService salaryService;
+
+    public EmployeeService(EmployeeRepository employeeRepository, CountryRepository countryRepository, DepartmentRepository departmentRepository, EmployeeMapper employeeMapper, SalaryService salaryService) {
+        this.employeeRepository = employeeRepository;
+        this.countryRepository = countryRepository;
+        this.departmentRepository = departmentRepository;
+        this.employeeMapper = employeeMapper;
+        this.salaryService = salaryService;
+    }
 
     public EmployeeResponse createEmployee(EmployeeRequest request) {
 
@@ -58,7 +67,7 @@ public class EmployeeService {
     }
 
     @Transactional(readOnly = true)
-    public EmployeeResponse getEmployeeById(Long employeeId) {
+    public EmployeeDetailsResponse getEmployeeById(Long employeeId) {
 
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() ->
@@ -66,7 +75,16 @@ public class EmployeeService {
 
         Salary currentSalary = salaryService.getCurrentSalary(employeeId);
 
-        return employeeMapper.toResponse(employee, currentSalary);
+        EmployeeResponse employeeResponse =
+                employeeMapper.toResponse(employee, currentSalary);
+
+        List<SalaryResponse> salaryHistory =
+                salaryService.getSalaryHistory(employeeId);
+
+        return new EmployeeDetailsResponse(
+                employeeResponse,
+                salaryHistory
+        );
     }
 
     @Transactional(readOnly = true)

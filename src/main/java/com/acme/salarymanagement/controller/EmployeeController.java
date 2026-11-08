@@ -1,5 +1,6 @@
 package com.acme.salarymanagement.controller;
 
+import com.acme.salarymanagement.dto.employee.EmployeeDetailsResponse;
 import com.acme.salarymanagement.dto.employee.EmployeeRequest;
 import com.acme.salarymanagement.dto.employee.EmployeeResponse;
 import com.acme.salarymanagement.service.EmployeeService;
@@ -16,10 +17,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/employees")
-@RequiredArgsConstructor
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
 
     @PostMapping
     public ResponseEntity<EmployeeResponse> createEmployee(
@@ -31,11 +35,9 @@ public class EmployeeController {
     }
 
     @GetMapping("/{employeeId}")
-    public ResponseEntity<EmployeeResponse> getEmployeeById(
+    public ResponseEntity<EmployeeDetailsResponse> getEmployeeById(
             @PathVariable Long employeeId) {
-
-        EmployeeResponse response = employeeService.getEmployeeById(employeeId);
-
+        EmployeeDetailsResponse response = employeeService.getEmployeeById(employeeId);
         return ResponseEntity.ok(response);
     }
 

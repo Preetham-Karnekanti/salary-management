@@ -2,6 +2,7 @@ package com.acme.salarymanagement.service;
 
 import com.acme.salarymanagement.common.exception.DuplicateResourceException;
 import com.acme.salarymanagement.common.exception.ResourceNotFoundException;
+import com.acme.salarymanagement.dto.employee.EmployeeDetailsResponse;
 import com.acme.salarymanagement.dto.employee.EmployeeRequest;
 import com.acme.salarymanagement.dto.employee.EmployeeResponse;
 import com.acme.salarymanagement.dto.salary.SalaryRequest;
@@ -120,32 +121,71 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void shouldReturnEmployeeWithCurrentSalary() {
+    void shouldReturnEmployeeDetailsWithSalaryHistory() {
+        Long employeeId = 1L;
 
-        Employee employee = Employee.builder()
-                .id(1L)
-                .employeeCode("EMP1001")
-                .build();
+        Employee employee = mock(Employee.class);
+        Salary currentSalary = mock(Salary.class);
 
-        Salary salary = createSalary(employee, "85000.00");
+        SalaryResponse currentSalaryResponse = new SalaryResponse(
+                2L,
+                new BigDecimal("120000"),
+                "INR",
+                LocalDate.of(2026, 11, 1),
+                null
+        );
 
-        EmployeeResponse expectedResponse = createEmployeeResponse();
+        SalaryResponse previousSalaryResponse = new SalaryResponse(
+                1L,
+                new BigDecimal("100000"),
+                "INR",
+                LocalDate.of(2025, 4, 1),
+                LocalDate.of(2026, 10, 31)
+        );
 
-        when(employeeRepository.findById(1L))
+        EmployeeResponse employeeResponse = new EmployeeResponse(
+                1L,
+                "EMP00001",
+                "Arjun",
+                "Reddy",
+                "arjun@acme.com",
+                1L,
+                "India",
+                1L,
+                "Engineering",
+                "Software Engineer",
+                EmploymentStatus.ACTIVE,
+                LocalDate.of(2024, 1, 12),
+                currentSalaryResponse
+        );
+
+        List<SalaryResponse> salaryHistory =
+                List.of(currentSalaryResponse, previousSalaryResponse);
+
+        when(employeeRepository.findById(employeeId))
                 .thenReturn(Optional.of(employee));
 
-        when(salaryService.getCurrentSalary(1L))
-                .thenReturn(salary);
+        when(salaryService.getCurrentSalary(employeeId))
+                .thenReturn(currentSalary);
 
-        when(employeeMapper.toResponse(employee, salary))
-                .thenReturn(expectedResponse);
+        when(employeeMapper.toResponse(employee, currentSalary))
+                .thenReturn(employeeResponse);
 
-        EmployeeResponse result = employeeService.getEmployeeById(1L);
+        when(salaryService.getSalaryHistory(employeeId))
+                .thenReturn(salaryHistory);
 
-        assertSame(expectedResponse, result);
+        EmployeeDetailsResponse result =
+                employeeService.getEmployeeById(employeeId);
 
-        verify(employeeRepository).findById(1L);
-        verify(salaryService).getCurrentSalary(1L);
+        assertNotNull(result);
+        assertEquals(employeeResponse, result.employee());
+        assertEquals(2, result.salaryHistory().size());
+        assertEquals(currentSalaryResponse, result.salaryHistory().get(0));
+        assertEquals(previousSalaryResponse, result.salaryHistory().get(1));
+
+        verify(employeeRepository).findById(employeeId);
+        verify(salaryService).getCurrentSalary(employeeId);
+        verify(salaryService).getSalaryHistory(employeeId);
     }
 
     @Test
@@ -395,7 +435,8 @@ class EmployeeServiceTest {
                         1L,
                         new BigDecimal("85000.00"),
                         "INR",
-                        LocalDate.of(2026, 11, 7)
+                        LocalDate.of(2026, 11, 7),
+                        null
                 )
         );
     }

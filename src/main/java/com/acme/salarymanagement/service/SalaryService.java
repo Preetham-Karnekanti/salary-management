@@ -1,7 +1,9 @@
 package com.acme.salarymanagement.service;
 
 import com.acme.salarymanagement.common.exception.ResourceNotFoundException;
+import com.acme.salarymanagement.dto.salary.SalaryResponse;
 import com.acme.salarymanagement.entity.Salary;
+import com.acme.salarymanagement.mapper.SalaryMapper;
 import com.acme.salarymanagement.repository.SalaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,11 +17,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class SalaryService {
 
     private final SalaryRepository salaryRepository;
+    private final SalaryMapper salaryMapper;
+
+    public SalaryService(SalaryRepository salaryRepository, SalaryMapper salaryMapper) {
+        this.salaryRepository = salaryRepository;
+        this.salaryMapper = salaryMapper;
+    }
 
     public Salary getCurrentSalary(Long employeeId) {
         return salaryRepository.findByEmployee_IdAndEffectiveToIsNull(employeeId)
@@ -73,6 +80,15 @@ public class SalaryService {
                 .build();
 
         return salaryRepository.save(newSalary);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SalaryResponse> getSalaryHistory(Long employeeId) {
+        return salaryRepository
+                .findAllByEmployee_IdOrderByEffectiveFromDesc(employeeId)
+                .stream()
+                .map(salaryMapper::toResponse)
+                .toList();
     }
 
     public boolean hasSalaryChanged(Salary currentSalary, SalaryRequest request) {

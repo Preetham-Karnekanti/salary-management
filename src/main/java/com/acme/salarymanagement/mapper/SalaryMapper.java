@@ -16,7 +16,8 @@ public class SalaryMapper {
                 salary.getId(),
                 salary.getBaseSalary(),
                 salary.getCurrencyCode(),
-                salary.getEffectiveFrom()
+                salary.getEffectiveFrom(),
+                salary.getEffectiveTo()
         );
     }
 }

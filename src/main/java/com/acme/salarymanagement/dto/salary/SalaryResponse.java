@@ -7,6 +7,8 @@ public record SalaryResponse(
         Long id,
         BigDecimal baseSalary,
         String currencyCode,
-        LocalDate effectiveFrom
+        LocalDate effectiveFrom,
+
+        LocalDate effectiveTo
 ) {
 }

@@ -6,6 +6,7 @@ export interface Salary {
   baseSalary: number;
   currencyCode: string;
   effectiveFrom: string;
+  effectiveTo: string | null;
 }
 
 export interface Employee {
@@ -23,3 +24,16 @@ export interface Employee {
   hireDate: string;
   currentSalary: Salary;
 }
+
+export interface EmployeeDetailsResponse {
+  employee: Employee;
+  salaryHistory: Salary[];
+}
+
+
+export type EmployeeSortField =
+  | 'EMPLOYEE_CODE'
+  | 'FIRST_NAME'
+  | 'EMAIL'
+  | 'JOB_TITLE'
+  | 'EMPLOYMENT_STATUS';

@@ -5,20 +5,26 @@ import com.acme.salarymanagement.common.exception.ResourceNotFoundException;
 import com.acme.salarymanagement.dto.employee.EmployeeDetailsResponse;
 import com.acme.salarymanagement.dto.employee.EmployeeRequest;
 import com.acme.salarymanagement.dto.employee.EmployeeResponse;
+import com.acme.salarymanagement.dto.employee.EmployeeSearchRequest;
 import com.acme.salarymanagement.dto.salary.SalaryResponse;
 import com.acme.salarymanagement.entity.Country;
 import com.acme.salarymanagement.entity.Department;
 import com.acme.salarymanagement.entity.Employee;
 import com.acme.salarymanagement.entity.Salary;
+import com.acme.salarymanagement.enums.EmploymentStatus;
 import com.acme.salarymanagement.mapper.EmployeeMapper;
 import com.acme.salarymanagement.repository.CountryRepository;
 import com.acme.salarymanagement.repository.DepartmentRepository;
 import com.acme.salarymanagement.repository.EmployeeRepository;
 
+import com.acme.salarymanagement.specification.EmployeeSpecification;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +93,65 @@ public class EmployeeService {
         );
     }
 
+    public Page<EmployeeResponse> searchEmployees(
+            EmployeeSearchRequest searchRequest
+    ) {
+        Specification<Employee> specification =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.conjunction();
+
+        if (searchRequest.employmentStatus() != null) {
+            specification = specification.and(
+                    EmployeeSpecification.hasEmploymentStatus(
+                            searchRequest.employmentStatus()
+                    )
+            );
+        }
+
+        if (searchRequest.countryId() != null) {
+            specification = specification.and(
+                    EmployeeSpecification.belongsToCountry(
+                            searchRequest.countryId()
+                    )
+            );
+        }
+
+        if (searchRequest.departmentId() != null) {
+            specification = specification.and(
+                    EmployeeSpecification.belongsToDepartment(
+                            searchRequest.departmentId()
+                    )
+            );
+        }
+
+        Pageable pageable = PageRequest.of(
+                searchRequest.page(),
+                searchRequest.size(),
+                Sort.by(
+                        searchRequest.sortDirection(),
+                        searchRequest.sortBy().getProperty()
+                )
+        );
+
+        Page<Employee> employeePage =
+                employeeRepository.findAll(specification, pageable);
+
+        List<Long> employeeIds = employeePage.getContent()
+                .stream()
+                .map(Employee::getId)
+                .toList();
+
+        Map<Long, Salary> currentSalaries =
+                salaryService.getCurrentSalaries(employeeIds);
+
+        return employeePage.map(employee ->
+                employeeMapper.toResponse(
+                        employee,
+                        currentSalaries.get(employee.getId())
+                )
+        );
+    }
+
     @Transactional(readOnly = true)
     public Page<EmployeeResponse> getAllEmployees(Pageable pageable) {
         Page<Employee> employeePage = employeeRepository.findAll(pageable);
@@ -96,12 +161,13 @@ public class EmployeeService {
                 .map(Employee::getId)
                 .toList();
 
-        Map<Long, Salary> salaryMap = salaryService.getCurrentSalaries(employeeIds);
+        Map<Long, Salary> currentSalaries =
+                salaryService.getCurrentSalaries(employeeIds);
 
         return employeePage.map(employee ->
                 employeeMapper.toResponse(
                         employee,
-                        salaryMap.get(employee.getId())
+                        currentSalaries.get(employee.getId())
                 )
         );
     }

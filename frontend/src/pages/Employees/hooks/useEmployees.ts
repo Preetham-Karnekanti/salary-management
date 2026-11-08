@@ -1,10 +1,21 @@
 
 import { useEffect, useState } from 'react';
 
-import { getEmployees } from '@/api/employeeApi';
+import {
+  getEmployees,
+  type EmployeeSearchFilters,
+  type EmployeeSortField,
+} from '@/api/employeeApi';
+
 import type { Employee } from '@/types/employee';
 
-type SortDirection = 'asc' | 'desc';
+const SORT_FIELD_MAP: Record<string, EmployeeSortField> = {
+  employeeCode: 'EMPLOYEE_CODE',
+  firstName: 'FIRST_NAME',
+  email: 'EMAIL',
+  jobTitle: 'JOB_TITLE',
+  employmentStatus: 'EMPLOYMENT_STATUS',
+};
 
 export const useEmployees = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -18,7 +29,12 @@ export const useEmployees = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  const [sort, setSort] = useState('id,asc');
+  // Keep the sorting format expected by EmployeeTable.
+  const [sort, setSort] = useState('employeeCode,asc');
+
+  // Only applied filters are stored here.
+  const [filters, setFilters] = useState<EmployeeSearchFilters>({});
+
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -29,11 +45,18 @@ export const useEmployees = () => {
         setLoading(true);
         setError(null);
 
+        const [sortField, sortDirectionValue] = sort.split(',');
+
         const response = await getEmployees(
           {
+            ...filters,
             page,
             size: pageSize,
-            sort,
+            sortBy: SORT_FIELD_MAP[sortField] ?? 'EMPLOYEE_CODE',
+            sortDirection:
+              sortDirectionValue?.toUpperCase() === 'DESC'
+                ? 'DESC'
+                : 'ASC',
           },
           controller.signal
         );
@@ -63,12 +86,14 @@ export const useEmployees = () => {
     return () => {
       controller.abort();
     };
-  }, [page, pageSize, sort, refreshKey]);
+  }, [page, pageSize, sort, filters, refreshKey]);
 
   const goToPage = (newPage: number) => {
-    const lastPage = Math.max(totalPages - 1, 0);
+    if (newPage < 0 || newPage >= totalPages) {
+      return;
+    }
 
-    setPage(Math.min(Math.max(newPage, 0), lastPage));
+    setPage(newPage);
   };
 
   const changePageSize = (newPageSize: number) => {
@@ -82,9 +107,14 @@ export const useEmployees = () => {
 
   const changeSort = (
     field: string,
-    direction: SortDirection
+    direction: 'asc' | 'desc'
   ) => {
     setSort(`${field},${direction}`);
+    setPage(0);
+  };
+
+  const applyFilters = (newFilters: EmployeeSearchFilters) => {
+    setFilters(newFilters);
     setPage(0);
   };
 
@@ -102,10 +132,12 @@ export const useEmployees = () => {
     totalElements,
     totalPages,
     sort,
+    filters,
 
     goToPage,
     changePageSize,
     changeSort,
+    applyFilters,
     refresh,
   };
 };

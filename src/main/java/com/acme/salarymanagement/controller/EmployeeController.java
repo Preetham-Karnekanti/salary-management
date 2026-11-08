@@ -3,10 +3,10 @@ package com.acme.salarymanagement.controller;
 import com.acme.salarymanagement.dto.employee.EmployeeDetailsResponse;
 import com.acme.salarymanagement.dto.employee.EmployeeRequest;
 import com.acme.salarymanagement.dto.employee.EmployeeResponse;
+import com.acme.salarymanagement.dto.employee.EmployeeSearchRequest;
 import com.acme.salarymanagement.service.EmployeeService;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,6 +48,13 @@ public class EmployeeController {
         Page<EmployeeResponse> response = employeeService.getAllEmployees(pageable);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<Page<EmployeeResponse>> searchEmployees(@Valid @RequestBody EmployeeSearchRequest searchRequest) {
+        return ResponseEntity.ok(
+                employeeService.searchEmployees(searchRequest)
+        );
     }
 
     @PutMapping("/{employeeId}")

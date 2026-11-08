@@ -9,6 +9,25 @@ export interface Salary {
   effectiveTo: string | null;
 }
 
+export interface SalaryCreateRequest {
+  baseSalary: number;
+  currencyCode: string;
+  effectiveFrom: string;
+}
+
+export interface EmployeeCreateRequest {
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  countryId: number;
+  departmentId: number;
+  jobTitle: string;
+  employmentStatus: EmploymentStatus;
+  hireDate: string;
+  salary: SalaryCreateRequest;
+}
+
 export interface Employee {
   id: number;
   employeeCode: string;

@@ -5,6 +5,7 @@ import type {
   Employee,
   EmployeeDetailsResponse,
   EmploymentStatus,
+  EmployeeCreateRequest
 } from '@/types/employee';
 
 export type EmployeeSortField =
@@ -63,6 +64,17 @@ export const getEmployeeById = async (
   const response = await apiClient.get<EmployeeDetailsResponse>(
     `/employees/${employeeId}`,
     { signal }
+  );
+
+  return response.data;
+};
+
+export const createEmployee = async (
+  request: EmployeeCreateRequest
+): Promise<Employee> => {
+  const response = await apiClient.post<Employee>(
+    '/employees',
+    request
   );
 
   return response.data;

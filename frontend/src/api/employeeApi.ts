@@ -1,21 +1,9 @@
-
 import apiClient from '@/axios/axios';
 
-import type {
-  Employee,
-  EmployeeDetailsResponse,
-  EmploymentStatus,
-  EmployeeCreateRequest
-} from '@/types/employee';
+import type { Employee, EmployeeDetailsResponse, EmploymentStatus, EmployeeCreateRequest } from '@/types/employee';
 
 export type EmployeeSortField =
-  | 'EMPLOYEE_CODE'
-  | 'FIRST_NAME'
-  | 'EMAIL'
-  | 'JOB_TITLE'
-  | 'EMPLOYMENT_STATUS'
-  | 'COUNTRY'
-  | 'DEPARTMENT';
+  'EMPLOYEE_CODE' | 'FIRST_NAME' | 'EMAIL' | 'JOB_TITLE' | 'EMPLOYMENT_STATUS' | 'COUNTRY' | 'DEPARTMENT';
 
 export type SortDirection = 'ASC' | 'DESC';
 
@@ -46,36 +34,25 @@ export interface EmployeePageResponse {
 
 export const getEmployees = async (
   searchRequest: EmployeeSearchRequest,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<EmployeePageResponse> => {
-  const response = await apiClient.post<EmployeePageResponse>(
-    '/employees/search',
-    searchRequest,
-    { signal }
-  );
+  const response = await apiClient.post<EmployeePageResponse>('/employees/search', searchRequest, {
+    signal,
+  });
 
   return response.data;
 };
 
-export const getEmployeeById = async (
-  employeeId: number,
-  signal?: AbortSignal
-): Promise<EmployeeDetailsResponse> => {
-  const response = await apiClient.get<EmployeeDetailsResponse>(
-    `/employees/${employeeId}`,
-    { signal }
-  );
+export const getEmployeeById = async (employeeId: number, signal?: AbortSignal): Promise<EmployeeDetailsResponse> => {
+  const response = await apiClient.get<EmployeeDetailsResponse>(`/employees/${employeeId}`, {
+    signal,
+  });
 
   return response.data;
 };
 
-export const createEmployee = async (
-  request: EmployeeCreateRequest
-): Promise<Employee> => {
-  const response = await apiClient.post<Employee>(
-    '/employees',
-    request
-  );
+export const createEmployee = async (request: EmployeeCreateRequest): Promise<Employee> => {
+  const response = await apiClient.post<Employee>('/employees', request);
 
   return response.data;
 };

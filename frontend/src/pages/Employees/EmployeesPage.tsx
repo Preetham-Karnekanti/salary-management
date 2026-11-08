@@ -1,13 +1,6 @@
-
 import { useEffect, useState } from 'react';
 
-import {
-  Alert,
-  Box,
-  Button,
-  Snackbar,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Button, Snackbar, Typography } from '@mui/material';
 
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
@@ -20,11 +13,7 @@ import EmployeeFormDialog from '@/pages/Employees/components/EmployeeFormDialog'
 
 import { useEmployees } from '@/pages/Employees/hooks/useEmployees';
 
-import {
-  getCountries,
-  getDepartments,
-  type ReferenceOption,
-} from '@/api/referenceDataApi';
+import { getCountries, getDepartments, type ReferenceOption } from '@/api/referenceDataApi';
 
 import { createEmployee } from '@/api/employeeApi';
 
@@ -49,29 +38,22 @@ function EmployeesPage() {
   const [countries, setCountries] = useState<ReferenceOption[]>([]);
   const [departments, setDepartments] = useState<ReferenceOption[]>([]);
 
-  const [referenceDataError, setReferenceDataError] =
-    useState<string | null>(null);
+  const [referenceDataError, setReferenceDataError] = useState<string | null>(null);
 
   // Employee details dialog state
-  const [selectedEmployeeId, setSelectedEmployeeId] =
-    useState<number | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
 
-  const [isEmployeeDetailsDialogOpen, setIsEmployeeDetailsDialogOpen] =
-    useState(false);
+  const [isEmployeeDetailsDialogOpen, setIsEmployeeDetailsDialogOpen] = useState(false);
 
   // Employee creation dialog state
-  const [isCreateEmployeeDialogOpen, setIsCreateEmployeeDialogOpen] =
-    useState(false);
+  const [isCreateEmployeeDialogOpen, setIsCreateEmployeeDialogOpen] = useState(false);
 
-  const [isCreatingEmployee, setIsCreatingEmployee] =
-    useState(false);
+  const [isCreatingEmployee, setIsCreatingEmployee] = useState(false);
 
-  const [createEmployeeError, setCreateEmployeeError] =
-    useState<string | null>(null);
+  const [createEmployeeError, setCreateEmployeeError] = useState<string | null>(null);
 
   // Success notification state
-  const [isCreateSuccessSnackbarOpen, setIsCreateSuccessSnackbarOpen] =
-    useState(false);
+  const [isCreateSuccessSnackbarOpen, setIsCreateSuccessSnackbarOpen] = useState(false);
 
   // Load reference data
   useEffect(() => {
@@ -93,11 +75,7 @@ function EmployeesPage() {
           return;
         }
 
-        setReferenceDataError(
-          error instanceof Error
-            ? error.message
-            : 'Failed to load filter options'
-        );
+        setReferenceDataError(error instanceof Error ? error.message : 'Failed to load filter options');
       }
     };
 
@@ -135,9 +113,7 @@ function EmployeesPage() {
   };
 
   // Create employee
-  const onSubmitCreateEmployee = async (
-    request: EmployeeCreateRequest
-  ) => {
+  const onSubmitCreateEmployee = async (request: EmployeeCreateRequest) => {
     try {
       setIsCreatingEmployee(true);
       setCreateEmployeeError(null);
@@ -155,8 +131,7 @@ function EmployeesPage() {
       let message = 'Failed to create employee. Please try again.';
 
       if (axios.isAxiosError<{ message?: string }>(error)) {
-        message =
-          error.response?.data?.message ?? error.message ?? message;
+        message = error.response?.data?.message ?? error.message ?? message;
       } else if (error instanceof Error) {
         message = error.message;
       }
@@ -175,23 +150,21 @@ function EmployeesPage() {
         gap: 3,
         width: '100%',
         minWidth: 0,
-      }}
-    >
+      }}>
       {/* Page heading */}
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: { xs: 'flex-start', sm: 'center' },
+          alignItems: {
+            xs: 'flex-start',
+            sm: 'center',
+          },
           flexWrap: 'wrap',
           gap: 2,
-        }}
-      >
+        }}>
         <Box>
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: 700, mb: 0.5 }}
-          >
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
             Employee Management
           </Typography>
 
@@ -206,21 +179,12 @@ function EmployeesPage() {
             alignItems: 'center',
             gap: 2,
             flexWrap: 'wrap',
-          }}
-        >
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            fontWeight={600}
-          >
+          }}>
+          <Typography variant="body2" color="text.secondary" fontWeight={600}>
             {totalElements.toLocaleString()} Employees
           </Typography>
 
-          <Button
-            variant="contained"
-            startIcon={<AddRoundedIcon />}
-            onClick={onClickAddEmployee}
-          >
+          <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={onClickAddEmployee}>
             Add Employee
           </Button>
         </Box>
@@ -228,33 +192,21 @@ function EmployeesPage() {
 
       {/* Reference data error */}
       {referenceDataError && (
-        <Alert severity="error">
-          Unable to load country and department options:{' '}
-          {referenceDataError}
-        </Alert>
+        <Alert severity="error">Unable to load country and department options: {referenceDataError}</Alert>
       )}
 
       {/* Employee filters */}
-      <EmployeeFilters
-        countries={countries}
-        departments={departments}
-        onApply={applyFilters}
-      />
+      <EmployeeFilters countries={countries} departments={departments} onApply={applyFilters} />
 
       {/* Employee API error */}
       {error && (
         <Alert
           severity="error"
           action={
-            <Button
-              color="inherit"
-              size="small"
-              onClick={refresh}
-            >
+            <Button color="inherit" size="small" onClick={refresh}>
               Retry
             </Button>
-          }
-        >
+          }>
           Failed to load employees: {error}
         </Alert>
       )}
@@ -303,14 +255,12 @@ function EmployeesPage() {
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right',
-        }}
-      >
+        }}>
         <Alert
           onClose={() => setIsCreateSuccessSnackbarOpen(false)}
           severity="success"
           variant="filled"
-          sx={{ width: '100%' }}
-        >
+          sx={{ width: '100%' }}>
           Employee created successfully!
         </Alert>
       </Snackbar>

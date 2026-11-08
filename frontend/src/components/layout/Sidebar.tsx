@@ -1,4 +1,3 @@
-
 import {
   Box,
   Divider,
@@ -71,16 +70,14 @@ function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           borderRight: 1,
           borderColor: 'divider',
         },
-      }}
-    >
+      }}>
       <Box
         component="aside"
         sx={{
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-        }}
-      >
+        }}>
         {/* Branding */}
         <Box
           sx={{
@@ -89,8 +86,7 @@ function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             gap: 1.5,
             px: 3,
             py: 3,
-          }}
-        >
+          }}>
           <Box
             sx={{
               display: 'flex',
@@ -101,16 +97,17 @@ function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               borderRadius: 2,
               backgroundColor: 'primary.main',
               color: '#FFFFFF',
-            }}
-          >
+            }}>
             <BusinessRoundedIcon />
           </Box>
 
           <Box>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 700, lineHeight: 1.2 }}
-            >
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}>
               ACME
             </Typography>
 
@@ -128,45 +125,45 @@ function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             variant="caption"
             color="text.secondary"
             fontWeight={600}
-            sx={{ px: 2, mb: 1.5, display: 'block' }}
-          >
+            sx={{
+              px: 2,
+              mb: 1.5,
+              display: 'block',
+            }}>
             WORKSPACE
           </Typography>
 
           <List disablePadding>
-            <ListItemButton
-              component={NavLink}
-              to="/employees"
-              end
-              onClick={onClose}
-              sx={navigationItemStyles}
-            >
+            <ListItemButton component={NavLink} to="/employees" end onClick={onClose} sx={navigationItemStyles}>
               <ListItemIcon>
                 <PeopleAltOutlinedIcon />
               </ListItemIcon>
 
               <ListItemText
                 primary={
-                  <Typography sx={{ fontWeight: 600, fontSize: 14 }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: 14,
+                    }}>
                     Employees
                   </Typography>
                 }
               />
             </ListItemButton>
 
-            <ListItemButton
-              component={NavLink}
-              to="/salary-management"
-              onClick={onClose}
-              sx={navigationItemStyles}
-            >
+            <ListItemButton component={NavLink} to="/salary-management" onClick={onClose} sx={navigationItemStyles}>
               <ListItemIcon>
                 <PaymentsOutlinedIcon />
               </ListItemIcon>
 
               <ListItemText
                 primary={
-                  <Typography sx={{ fontWeight: 600, fontSize: 14 }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: 14,
+                    }}>
                     Salary Management
                   </Typography>
                 }

@@ -1,4 +1,3 @@
-
 export type EmploymentStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface Salary {
@@ -49,10 +48,4 @@ export interface EmployeeDetailsResponse {
   salaryHistory: Salary[];
 }
 
-
-export type EmployeeSortField =
-  | 'EMPLOYEE_CODE'
-  | 'FIRST_NAME'
-  | 'EMAIL'
-  | 'JOB_TITLE'
-  | 'EMPLOYMENT_STATUS';
+export type EmployeeSortField = 'EMPLOYEE_CODE' | 'FIRST_NAME' | 'EMAIL' | 'JOB_TITLE' | 'EMPLOYMENT_STATUS';

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 
 import { Box } from '@mui/material';
@@ -25,13 +24,9 @@ function MainLayout() {
         minHeight: '100vh',
         width: '100%',
         backgroundColor: 'background.default',
-      }}
-    >
+      }}>
       {/* Sidebar */}
-      <Sidebar
-        mobileOpen={mobileOpen}
-        onClose={handleMenuClose}
-      />
+      <Sidebar mobileOpen={mobileOpen} onClose={handleMenuClose} />
 
       {/* Main section */}
       <Box
@@ -40,8 +35,7 @@ function MainLayout() {
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
-        }}
-      >
+        }}>
         {/* Header */}
         <Header onMenuClick={handleMenuOpen} />
 
@@ -56,8 +50,7 @@ function MainLayout() {
               sm: 3,
               md: 4,
             },
-          }}
-        >
+          }}>
           <Outlet />
         </Box>
       </Box>

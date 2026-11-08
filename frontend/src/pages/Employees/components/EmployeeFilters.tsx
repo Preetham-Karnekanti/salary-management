@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 
 import {
@@ -26,23 +25,16 @@ interface EmployeeFiltersProps {
   onApply: (filters: EmployeeSearchFilters) => void;
 }
 
-function EmployeeFilters({
-  countries,
-  departments,
-  onApply,
-}: EmployeeFiltersProps) {
+function EmployeeFilters({ countries, departments, onApply }: EmployeeFiltersProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const [employmentStatus, setEmploymentStatus] =
-    useState<EmploymentStatus | ''>('');
+  const [employmentStatus, setEmploymentStatus] = useState<EmploymentStatus | ''>('');
 
   const [countryId, setCountryId] = useState<number | ''>('');
 
   const [departmentId, setDepartmentId] = useState<number | ''>('');
 
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const buildFilters = (term: string): EmployeeSearchFilters => {
     return {
@@ -120,8 +112,7 @@ function EmployeeFilters({
       sx={{
         p: { xs: 2, sm: 3 },
         borderRadius: 2,
-      }}
-    >
+      }}>
       <Box sx={{ mb: 2 }}>
         <Typography variant="subtitle1" fontWeight={600}>
           Search and Filters
@@ -166,24 +157,16 @@ function EmployeeFilters({
           },
           gap: 2,
           alignItems: 'center',
-        }}
-      >
+        }}>
         {/* Employment Status */}
         <FormControl fullWidth size="small">
-          <InputLabel id="employment-status-label">
-            Employment Status
-          </InputLabel>
+          <InputLabel id="employment-status-label">Employment Status</InputLabel>
 
           <Select
             labelId="employment-status-label"
             value={employmentStatus}
             label="Employment Status"
-            onChange={(event) =>
-              setEmploymentStatus(
-                event.target.value as EmploymentStatus | ''
-              )
-            }
-          >
+            onChange={(event) => setEmploymentStatus(event.target.value as EmploymentStatus | '')}>
             <MenuItem value="">All statuses</MenuItem>
             <MenuItem value="ACTIVE">Active</MenuItem>
             <MenuItem value="INACTIVE">Inactive</MenuItem>
@@ -192,22 +175,13 @@ function EmployeeFilters({
 
         {/* Country */}
         <FormControl fullWidth size="small">
-          <InputLabel id="country-label">
-            Country
-          </InputLabel>
+          <InputLabel id="country-label">Country</InputLabel>
 
           <Select
             labelId="country-label"
             value={countryId}
             label="Country"
-            onChange={(event) =>
-              setCountryId(
-                event.target.value === ''
-                  ? ''
-                  : Number(event.target.value)
-              )
-            }
-          >
+            onChange={(event) => setCountryId(event.target.value === '' ? '' : Number(event.target.value))}>
             <MenuItem value="">All countries</MenuItem>
 
             {countries.map((country) => (
@@ -220,22 +194,13 @@ function EmployeeFilters({
 
         {/* Department */}
         <FormControl fullWidth size="small">
-          <InputLabel id="department-label">
-            Department
-          </InputLabel>
+          <InputLabel id="department-label">Department</InputLabel>
 
           <Select
             labelId="department-label"
             value={departmentId}
             label="Department"
-            onChange={(event) =>
-              setDepartmentId(
-                event.target.value === ''
-                  ? ''
-                  : Number(event.target.value)
-              )
-            }
-          >
+            onChange={(event) => setDepartmentId(event.target.value === '' ? '' : Number(event.target.value))}>
             <MenuItem value="">All departments</MenuItem>
 
             {departments.map((department) => (
@@ -248,20 +213,11 @@ function EmployeeFilters({
 
         {/* Actions */}
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="contained"
-            onClick={handleApply}
-            sx={{ flex: 1 }}
-          >
+          <Button variant="contained" onClick={handleApply} sx={{ flex: 1 }}>
             Apply
           </Button>
 
-          <Button
-            variant="outlined"
-            color="inherit"
-            onClick={handleReset}
-            sx={{ flex: 1 }}
-          >
+          <Button variant="outlined" color="inherit" onClick={handleReset} sx={{ flex: 1 }}>
             Reset
           </Button>
         </Box>

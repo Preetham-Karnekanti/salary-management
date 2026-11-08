@@ -1,11 +1,6 @@
-
 import { useEffect, useState } from 'react';
 
-import {
-  getEmployees,
-  type EmployeeSearchFilters,
-  type EmployeeSortField,
-} from '@/api/employeeApi';
+import { getEmployees, type EmployeeSearchFilters, type EmployeeSortField } from '@/api/employeeApi';
 
 import type { Employee } from '@/types/employee';
 
@@ -19,7 +14,6 @@ const SORT_FIELD_MAP: Record<string, EmployeeSortField> = {
 
 export const useEmployees = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,12 +47,9 @@ export const useEmployees = () => {
             page,
             size: pageSize,
             sortBy: SORT_FIELD_MAP[sortField] ?? 'EMPLOYEE_CODE',
-            sortDirection:
-              sortDirectionValue?.toUpperCase() === 'DESC'
-                ? 'DESC'
-                : 'ASC',
+            sortDirection: sortDirectionValue?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC',
           },
-          controller.signal
+          controller.signal,
         );
 
         setEmployees(response.content);
@@ -69,11 +60,7 @@ export const useEmployees = () => {
           return;
         }
 
-        setError(
-          error instanceof Error
-            ? error.message
-            : 'Failed to fetch employees'
-        );
+        setError(error instanceof Error ? error.message : 'Failed to fetch employees');
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -105,10 +92,7 @@ export const useEmployees = () => {
     setPage(0);
   };
 
-  const changeSort = (
-    field: string,
-    direction: 'asc' | 'desc'
-  ) => {
+  const changeSort = (field: string, direction: 'asc' | 'desc') => {
     setSort(`${field},${direction}`);
     setPage(0);
   };

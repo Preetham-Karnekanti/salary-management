@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 
 import {
@@ -22,10 +21,7 @@ import {
 
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
-import type {
-  EmploymentStatus,
-  EmployeeCreateRequest,
-} from '@/types/employee';
+import type { EmploymentStatus, EmployeeCreateRequest } from '@/types/employee';
 
 import type { ReferenceOption } from '@/api/referenceDataApi';
 
@@ -90,9 +86,7 @@ function EmployeeFormDialog({
     }
   }, [open]);
 
-  const handleTextChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
     setForm((previousForm) => ({
@@ -131,20 +125,15 @@ function EmployeeFormDialog({
       fullWidth
       maxWidth="md"
       fullScreen={fullScreen}
-      aria-labelledby="employee-form-title"
-    >
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-      >
+      aria-labelledby="employee-form-title">
+      <Box component="form" onSubmit={handleSubmit}>
         <DialogTitle
           id="employee-form-title"
           sx={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-          }}
-        >
+          }}>
           <Box>
             <Typography variant="h6" fontWeight={700}>
               Add Employee
@@ -155,23 +144,19 @@ function EmployeeFormDialog({
             </Typography>
           </Box>
 
-          <IconButton
-            onClick={onClose}
-            disabled={submitting}
-            aria-label="Close employee form"
-          >
+          <IconButton onClick={onClose} disabled={submitting} aria-label="Close employee form">
             <CloseRoundedIcon />
           </IconButton>
         </DialogTitle>
 
         <DialogContent dividers>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-
-            {submitError && (
-              <Alert severity="error">
-                {submitError}
-              </Alert>
-            )}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 3,
+            }}>
+            {submitError && <Alert severity="error">{submitError}</Alert>}
 
             {/* Employee Information */}
             <Box>
@@ -187,8 +172,7 @@ function EmployeeFormDialog({
                     sm: 'repeat(2, minmax(0, 1fr))',
                   },
                   gap: 2,
-                }}
-              >
+                }}>
                 <TextField
                   name="employeeCode"
                   label="Employee Code"
@@ -198,7 +182,9 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: { maxLength: 30 },
+                    htmlInput: {
+                      maxLength: 30,
+                    },
                   }}
                 />
 
@@ -212,7 +198,9 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: { maxLength: 100 },
+                    htmlInput: {
+                      maxLength: 100,
+                    },
                   }}
                 />
 
@@ -225,7 +213,9 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: { maxLength: 100 },
+                    htmlInput: {
+                      maxLength: 100,
+                    },
                   }}
                 />
 
@@ -238,14 +228,14 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: { maxLength: 100 },
+                    htmlInput: {
+                      maxLength: 100,
+                    },
                   }}
                 />
 
                 <FormControl fullWidth size="small" required>
-                  <InputLabel id="country-select-label">
-                    Country
-                  </InputLabel>
+                  <InputLabel id="country-select-label">Country</InputLabel>
 
                   <Select
                     labelId="country-select-label"
@@ -257,8 +247,7 @@ function EmployeeFormDialog({
                         ...previousForm,
                         countryId: event.target.value,
                       }))
-                    }
-                  >
+                    }>
                     {countries.map((country) => (
                       <MenuItem key={country.id} value={String(country.id)}>
                         {country.name}
@@ -268,9 +257,7 @@ function EmployeeFormDialog({
                 </FormControl>
 
                 <FormControl fullWidth size="small" required>
-                  <InputLabel id="department-select-label">
-                    Department
-                  </InputLabel>
+                  <InputLabel id="department-select-label">Department</InputLabel>
 
                   <Select
                     labelId="department-select-label"
@@ -282,13 +269,9 @@ function EmployeeFormDialog({
                         ...previousForm,
                         departmentId: event.target.value,
                       }))
-                    }
-                  >
+                    }>
                     {departments.map((department) => (
-                      <MenuItem
-                        key={department.id}
-                        value={String(department.id)}
-                      >
+                      <MenuItem key={department.id} value={String(department.id)}>
                         {department.name}
                       </MenuItem>
                     ))}
@@ -304,14 +287,14 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: { maxLength: 150 },
+                    htmlInput: {
+                      maxLength: 150,
+                    },
                   }}
                 />
 
                 <FormControl fullWidth size="small" required>
-                  <InputLabel id="employment-status-select-label">
-                    Employment Status
-                  </InputLabel>
+                  <InputLabel id="employment-status-select-label">Employment Status</InputLabel>
 
                   <Select
                     labelId="employment-status-select-label"
@@ -320,11 +303,9 @@ function EmployeeFormDialog({
                     onChange={(event) =>
                       setForm((previousForm) => ({
                         ...previousForm,
-                        employmentStatus:
-                          event.target.value as EmploymentStatus,
+                        employmentStatus: event.target.value as EmploymentStatus,
                       }))
-                    }
-                  >
+                    }>
                     <MenuItem value="ACTIVE">Active</MenuItem>
                     <MenuItem value="INACTIVE">Inactive</MenuItem>
                   </Select>
@@ -340,7 +321,9 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    inputLabel: { shrink: true },
+                    inputLabel: {
+                      shrink: true,
+                    },
                   }}
                 />
               </Box>
@@ -360,8 +343,7 @@ function EmployeeFormDialog({
                     sm: 'repeat(2, minmax(0, 1fr))',
                   },
                   gap: 2,
-                }}
-              >
+                }}>
                 <TextField
                   name="baseSalary"
                   label="Base Salary"
@@ -387,9 +369,7 @@ function EmployeeFormDialog({
                   onChange={(event) =>
                     setForm((previousForm) => ({
                       ...previousForm,
-                      currencyCode: event.target.value
-                        .toUpperCase()
-                        .slice(0, 3),
+                      currencyCode: event.target.value.toUpperCase().slice(0, 3),
                     }))
                   }
                   required
@@ -412,7 +392,9 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    inputLabel: { shrink: true },
+                    inputLabel: {
+                      shrink: true,
+                    },
                   }}
                 />
               </Box>
@@ -421,20 +403,11 @@ function EmployeeFormDialog({
         </DialogContent>
 
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button
-            variant="outlined"
-            color="inherit"
-            onClick={onClose}
-            disabled={submitting}
-          >
+          <Button variant="outlined" color="inherit" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
 
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={submitting}
-          >
+          <Button type="submit" variant="contained" disabled={submitting}>
             {submitting ? 'Creating...' : 'Create Employee'}
           </Button>
         </DialogActions>

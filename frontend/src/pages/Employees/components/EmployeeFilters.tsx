@@ -44,70 +44,43 @@ function EmployeeFilters({
     null
   );
 
-  // Keep the latest dropdown selections available to the debounce callback.
-  const selectedFiltersRef = useRef({
-    employmentStatus,
-    countryId,
-    departmentId,
-  });
-
-  selectedFiltersRef.current = {
-    employmentStatus,
-    countryId,
-    departmentId,
-  };
-
-  // Keep the latest callback without restarting the debounce timer.
-  const onApplyRef = useRef(onApply);
-  onApplyRef.current = onApply;
-
   const buildFilters = (term: string): EmployeeSearchFilters => {
-    const selectedFilters = selectedFiltersRef.current;
-
-    const filters: EmployeeSearchFilters = {};
-
-    if (term.trim()) {
-      filters.searchTerm = term.trim();
-    }
-
-    if (selectedFilters.employmentStatus) {
-      filters.employmentStatus = selectedFilters.employmentStatus;
-    }
-
-    if (selectedFilters.countryId !== '') {
-      filters.countryId = selectedFilters.countryId;
-    }
-
-    if (selectedFilters.departmentId !== '') {
-      filters.departmentId = selectedFilters.departmentId;
-    }
-
-    return filters;
-  };
-
-  // Clean up any pending timer when the component unmounts.
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current !== null) {
-        clearTimeout(debounceTimerRef.current);
-      }
+    return {
+      ...(term.trim() && {
+        searchTerm: term.trim(),
+      }),
+      ...(employmentStatus && {
+        employmentStatus,
+      }),
+      ...(countryId !== '' && {
+        countryId,
+      }),
+      ...(departmentId !== '' && {
+        departmentId,
+      }),
     };
-  }, []);
+  };
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
 
+    // Cancel the previous pending timer.
     if (debounceTimerRef.current !== null) {
       clearTimeout(debounceTimerRef.current);
     }
 
+    // Capture the current search and dropdown selections.
+    const filters = buildFilters(value);
+
+    // Execute the search after 400 ms of inactivity.
     debounceTimerRef.current = setTimeout(() => {
-      onApplyRef.current(buildFilters(value));
+      onApply(filters);
       debounceTimerRef.current = null;
     }, 400);
   };
 
   const handleApply = () => {
+    // Cancel pending debounce to avoid duplicate requests.
     if (debounceTimerRef.current !== null) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
@@ -117,6 +90,7 @@ function EmployeeFilters({
   };
 
   const handleReset = () => {
+    // Cancel any pending search.
     if (debounceTimerRef.current !== null) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
@@ -127,8 +101,18 @@ function EmployeeFilters({
     setCountryId('');
     setDepartmentId('');
 
+    // Immediately fetch employees without filters.
     onApply({});
   };
+
+  // Clean up the timer when the component unmounts.
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current !== null) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Paper
@@ -208,7 +192,9 @@ function EmployeeFilters({
 
         {/* Country */}
         <FormControl fullWidth size="small">
-          <InputLabel id="country-label">Country</InputLabel>
+          <InputLabel id="country-label">
+            Country
+          </InputLabel>
 
           <Select
             labelId="country-label"
@@ -234,7 +220,9 @@ function EmployeeFilters({
 
         {/* Department */}
         <FormControl fullWidth size="small">
-          <InputLabel id="department-label">Department</InputLabel>
+          <InputLabel id="department-label">
+            Department
+          </InputLabel>
 
           <Select
             labelId="department-label"

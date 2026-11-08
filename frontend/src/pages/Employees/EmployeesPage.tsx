@@ -8,7 +8,9 @@ import {
   Snackbar,
   Typography,
 } from '@mui/material';
+
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+
 import axios from 'axios';
 
 import EmployeeTable from '@/pages/Employees/components/EmployeeTable';
@@ -23,7 +25,9 @@ import {
   getDepartments,
   type ReferenceOption,
 } from '@/api/referenceDataApi';
+
 import { createEmployee } from '@/api/employeeApi';
+
 import type { EmployeeCreateRequest } from '@/types/employee';
 
 function EmployeesPage() {
@@ -52,15 +56,24 @@ function EmployeesPage() {
   const [selectedEmployeeId, setSelectedEmployeeId] =
     useState<number | null>(null);
 
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [isEmployeeDetailsDialogOpen, setIsEmployeeDetailsDialogOpen] =
+    useState(false);
 
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  // Employee creation dialog state
+  const [isCreateEmployeeDialogOpen, setIsCreateEmployeeDialogOpen] =
+    useState(false);
+
+  const [isCreatingEmployee, setIsCreatingEmployee] =
+    useState(false);
+
+  const [createEmployeeError, setCreateEmployeeError] =
+    useState<string | null>(null);
 
   // Success notification state
-  const [successOpen, setSuccessOpen] = useState(false);
+  const [isCreateSuccessSnackbarOpen, setIsCreateSuccessSnackbarOpen] =
+    useState(false);
 
+  // Load reference data
   useEffect(() => {
     const controller = new AbortController();
 
@@ -95,51 +108,49 @@ function EmployeesPage() {
     };
   }, []);
 
-  // Open employee details
-  const handleViewEmployee = (employeeId: number) => {
+  // Employee details dialog
+  const onViewEmployee = (employeeId: number) => {
     setSelectedEmployeeId(employeeId);
-    setDetailsOpen(true);
+    setIsEmployeeDetailsDialogOpen(true);
   };
 
-  // Close employee details
-  const handleCloseDetails = () => {
-    setDetailsOpen(false);
+  const onCloseEmployeeDetailsDialog = () => {
+    setIsEmployeeDetailsDialogOpen(false);
     setSelectedEmployeeId(null);
   };
 
-  // Open employee creation dialog
-  const handleOpenCreateDialog = () => {
-    setSubmitError(null);
-    setCreateDialogOpen(true);
+  // Employee creation dialog
+  const onClickAddEmployee = () => {
+    setCreateEmployeeError(null);
+    setIsCreateEmployeeDialogOpen(true);
   };
 
-  // Close employee creation dialog
-  const handleCloseCreateDialog = () => {
-    if (submitting) {
+  const onCloseCreateEmployeeDialog = () => {
+    if (isCreatingEmployee) {
       return;
     }
 
-    setCreateDialogOpen(false);
-    setSubmitError(null);
+    setIsCreateEmployeeDialogOpen(false);
+    setCreateEmployeeError(null);
   };
 
   // Create employee
-  const handleCreateEmployee = async (
+  const onSubmitCreateEmployee = async (
     request: EmployeeCreateRequest
   ) => {
     try {
-      setSubmitting(true);
-      setSubmitError(null);
+      setIsCreatingEmployee(true);
+      setCreateEmployeeError(null);
 
       await createEmployee(request);
 
-      setCreateDialogOpen(false);
+      setIsCreateEmployeeDialogOpen(false);
 
-      // Refresh the existing employee listing.
+      // Refresh employee listing.
       refresh();
 
       // Display success notification.
-      setSuccessOpen(true);
+      setIsCreateSuccessSnackbarOpen(true);
     } catch (error: unknown) {
       let message = 'Failed to create employee. Please try again.';
 
@@ -150,9 +161,9 @@ function EmployeesPage() {
         message = error.message;
       }
 
-      setSubmitError(message);
+      setCreateEmployeeError(message);
     } finally {
-      setSubmitting(false);
+      setIsCreatingEmployee(false);
     }
   };
 
@@ -208,7 +219,7 @@ function EmployeesPage() {
           <Button
             variant="contained"
             startIcon={<AddRoundedIcon />}
-            onClick={handleOpenCreateDialog}
+            onClick={onClickAddEmployee}
           >
             Add Employee
           </Button>
@@ -259,32 +270,34 @@ function EmployeesPage() {
         onPageChange={goToPage}
         onPageSizeChange={changePageSize}
         onSortChange={changeSort}
-        onViewEmployee={handleViewEmployee}
+        onViewEmployee={onViewEmployee}
       />
 
       {/* Employee details dialog */}
       <EmployeeDetailsDialog
-        open={detailsOpen}
+        open={isEmployeeDetailsDialogOpen}
         employeeId={selectedEmployeeId}
-        onClose={handleCloseDetails}
+        onClose={onCloseEmployeeDetailsDialog}
       />
 
+      {/* Employee creation dialog */}
       <EmployeeFormDialog
-        open={createDialogOpen}
+        open={isCreateEmployeeDialogOpen}
         countries={countries}
         departments={departments}
-        submitting={submitting}
-        submitError={submitError}
-        onClose={handleCloseCreateDialog}
-        onSubmit={handleCreateEmployee}
+        submitting={isCreatingEmployee}
+        submitError={createEmployeeError}
+        onClose={onCloseCreateEmployeeDialog}
+        onSubmit={onSubmitCreateEmployee}
       />
 
+      {/* Success notification */}
       <Snackbar
-        open={successOpen}
+        open={isCreateSuccessSnackbarOpen}
         autoHideDuration={4000}
         onClose={(_, reason) => {
           if (reason !== 'clickaway') {
-            setSuccessOpen(false);
+            setIsCreateSuccessSnackbarOpen(false);
           }
         }}
         anchorOrigin={{
@@ -293,7 +306,7 @@ function EmployeesPage() {
         }}
       >
         <Alert
-          onClose={() => setSuccessOpen(false)}
+          onClose={() => setIsCreateSuccessSnackbarOpen(false)}
           severity="success"
           variant="filled"
           sx={{ width: '100%' }}

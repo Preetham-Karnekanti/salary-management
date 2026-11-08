@@ -124,6 +124,20 @@ public class EmployeeService {
             );
         }
 
+        if (searchRequest.searchTerm() != null) {
+
+            String searchTerm = searchRequest.searchTerm().toLowerCase();
+
+            Specification<Employee> searchSpecification =
+                    EmployeeSpecification.hasFirstNameContaining(searchTerm)
+                            .or(EmployeeSpecification.hasLastNameContaining(searchTerm))
+                            .or(EmployeeSpecification.hasFullNameContaining(searchTerm))
+                            .or(EmployeeSpecification.hasEmployeeCodeContaining(searchTerm))
+                            .or(EmployeeSpecification.hasEmailContaining(searchTerm));
+
+            specification = specification.and(searchSpecification);
+        }
+
         Pageable pageable = PageRequest.of(
                 searchRequest.page(),
                 searchRequest.size(),

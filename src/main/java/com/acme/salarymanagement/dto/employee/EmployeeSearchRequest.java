@@ -6,9 +6,13 @@ import com.acme.salarymanagement.enums.EmploymentStatus;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Sort;
 
 public record EmployeeSearchRequest(
+
+        @Size(max = 150)
+        String searchTerm,
         EmploymentStatus employmentStatus,
         Long countryId,
         Long departmentId,

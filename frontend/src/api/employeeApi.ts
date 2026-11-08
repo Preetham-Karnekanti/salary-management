@@ -1,34 +1,25 @@
 
 import apiClient from '@/axios/axios';
-import type { Employee, EmployeeDetailsResponse, EmploymentStatus } from '@/types/employee';
 
-export interface EmployeePageResponse {
-  content: Employee[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-  first: boolean;
-  last: boolean;
-  empty: boolean;
-}
-
-export interface EmployeeSearchParams {
-  page?: number;
-  size?: number;
-  sort?: string;
-}
+import type {
+  Employee,
+  EmployeeDetailsResponse,
+  EmploymentStatus,
+} from '@/types/employee';
 
 export type EmployeeSortField =
   | 'EMPLOYEE_CODE'
   | 'FIRST_NAME'
   | 'EMAIL'
   | 'JOB_TITLE'
-  | 'EMPLOYMENT_STATUS';
+  | 'EMPLOYMENT_STATUS'
+  | 'COUNTRY'
+  | 'DEPARTMENT';
 
 export type SortDirection = 'ASC' | 'DESC';
 
 export interface EmployeeSearchFilters {
+  searchTerm?: string;
   employmentStatus?: EmploymentStatus;
   countryId?: number;
   departmentId?: number;
@@ -39,6 +30,17 @@ export interface EmployeeSearchRequest extends EmployeeSearchFilters {
   size: number;
   sortBy: EmployeeSortField;
   sortDirection: SortDirection;
+}
+
+export interface EmployeePageResponse {
+  content: Employee[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
 }
 
 export const getEmployees = async (

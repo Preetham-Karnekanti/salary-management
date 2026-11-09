@@ -14,11 +14,9 @@ import {
   Typography,
 } from '@mui/material';
 import { IconButton, Tooltip } from '@mui/material';
-
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import type { Employee } from '@/types/employee';
-
 type SortDirection = 'asc' | 'desc';
 
 type SortField = 'firstName' | 'employeeCode' | 'email' | 'jobTitle' | 'employmentStatus';
@@ -31,7 +29,7 @@ interface EmployeeTableProps {
   totalElements: number;
   sort: string;
   onViewEmployee: (employeeId: number) => void;
-
+  onEditEmployee: (employee: Employee) => void;
   onPageChange: (newPage: number) => void;
   onPageSizeChange: (newPageSize: number) => void;
   onSortChange: (field: string, direction: SortDirection) => void;
@@ -48,6 +46,7 @@ function EmployeeTable({
   onPageSizeChange,
   onSortChange,
   onViewEmployee,
+  onEditEmployee
 }: EmployeeTableProps) {
   const [sortField, sortDirectionValue] = sort.split(',');
 
@@ -206,15 +205,27 @@ function EmployeeTable({
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <Tooltip title="View employee details">
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        aria-label={`View details of ${employee.firstName} ${employee.lastName}`}
-                        onClick={() => onViewEmployee(employee.id)}>
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
+                      <Tooltip title="View employee details">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          aria-label={`View ${employee.firstName} ${employee.lastName}`}
+                          onClick={() => onViewEmployee(employee.id)}>
+                          <VisibilityOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Edit employee">
+                        <IconButton
+                          size="small"
+                          color="default"
+                          aria-label={`Edit ${employee.firstName} ${employee.lastName}`}
+                          onClick={() => onEditEmployee(employee)}>
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))

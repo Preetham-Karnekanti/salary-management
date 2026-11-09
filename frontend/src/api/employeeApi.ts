@@ -1,6 +1,12 @@
 import apiClient from '@/axios/axios';
 
-import type { Employee, EmployeeDetailsResponse, EmploymentStatus, EmployeeCreateRequest } from '@/types/employee';
+import type {
+  Employee,
+  EmployeeDetailsResponse,
+  EmploymentStatus,
+  EmployeeCreateRequest,
+  EmployeeUpdateRequest,
+} from '@/types/employee';
 
 export type EmployeeSortField =
   'EMPLOYEE_CODE' | 'FIRST_NAME' | 'EMAIL' | 'JOB_TITLE' | 'EMPLOYMENT_STATUS' | 'COUNTRY' | 'DEPARTMENT';
@@ -54,5 +60,10 @@ export const getEmployeeById = async (employeeId: number, signal?: AbortSignal):
 export const createEmployee = async (request: EmployeeCreateRequest): Promise<Employee> => {
   const response = await apiClient.post<Employee>('/employees', request);
 
+  return response.data;
+};
+
+export const updateEmployee = async (employeeId: number, request: EmployeeUpdateRequest): Promise<Employee> => {
+  const response = await apiClient.put<Employee>(`/employees/${employeeId}`, request);
   return response.data;
 };

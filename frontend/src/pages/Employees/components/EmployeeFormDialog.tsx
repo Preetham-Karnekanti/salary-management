@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 
 import {
   Alert,
@@ -21,12 +22,16 @@ import {
 
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
-import type { EmploymentStatus, EmployeeCreateRequest } from '@/types/employee';
+import type { EmploymentStatus, Employee, EmployeeCreateRequest } from '@/types/employee';
 
 import type { ReferenceOption } from '@/api/referenceDataApi';
 
+type EmployeeFormMode = 'create' | 'edit';
+
 interface EmployeeFormDialogProps {
   open: boolean;
+  mode: EmployeeFormMode;
+  employee: Employee | null;
   countries: ReferenceOption[];
   departments: ReferenceOption[];
   submitting?: boolean;
@@ -50,7 +55,7 @@ interface EmployeeFormState {
   effectiveFrom: string;
 }
 
-const initialFormState: EmployeeFormState = {
+const createEmptyForm = (): EmployeeFormState => ({
   employeeCode: '',
   firstName: '',
   lastName: '',
@@ -63,10 +68,33 @@ const initialFormState: EmployeeFormState = {
   baseSalary: '',
   currencyCode: '',
   effectiveFrom: '',
+});
+
+const createEmployeeForm = (employee: Employee | null): EmployeeFormState => {
+  if (!employee) {
+    return createEmptyForm();
+  }
+
+  return {
+    employeeCode: employee.employeeCode,
+    firstName: employee.firstName,
+    lastName: employee.lastName,
+    email: employee.email,
+    countryId: String(employee.countryId),
+    departmentId: String(employee.departmentId),
+    jobTitle: employee.jobTitle,
+    employmentStatus: employee.employmentStatus,
+    hireDate: employee.hireDate,
+    baseSalary: employee.currentSalary ? String(employee.currentSalary.baseSalary) : '',
+    currencyCode: employee.currentSalary?.currencyCode ?? '',
+    effectiveFrom: employee.currentSalary?.effectiveFrom ?? '',
+  };
 };
 
 function EmployeeFormDialog({
   open,
+  mode,
+  employee,
   countries,
   departments,
   submitting = false,
@@ -76,17 +104,24 @@ function EmployeeFormDialog({
 }: EmployeeFormDialogProps) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const today = (() => {
+    const date = new Date();
 
-  const [form, setForm] = useState<EmployeeFormState>(initialFormState);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
 
-  // Reset the form whenever the dialog is opened.
+    return `${year}-${month}-${day}`;
+  })();
+  const [form, setForm] = useState<EmployeeFormState>(createEmptyForm);
+
   useEffect(() => {
     if (open) {
-      setForm(initialFormState);
+      setForm(createEmployeeForm(employee));
     }
-  }, [open]);
+  }, [open, employee, mode]);
 
-  const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTextChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
     setForm((previousForm) => ({
@@ -95,7 +130,7 @@ function EmployeeFormDialog({
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const request: EmployeeCreateRequest = {
@@ -118,6 +153,8 @@ function EmployeeFormDialog({
     onSubmit(request);
   };
 
+  const isEditMode = mode === 'edit';
+
   return (
     <Dialog
       open={open}
@@ -135,12 +172,14 @@ function EmployeeFormDialog({
             justifyContent: 'space-between',
           }}>
           <Box>
-            <Typography variant="h6" fontWeight={700}>
-              Add Employee
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {isEditMode ? 'Edit Employee' : 'Add Employee'}
             </Typography>
 
             <Typography variant="caption" color="text.secondary">
-              Enter employee and initial salary information.
+              {isEditMode
+                ? 'Update employee and salary information.'
+                : 'Enter employee and initial salary information.'}
             </Typography>
           </Box>
 
@@ -150,12 +189,7 @@ function EmployeeFormDialog({
         </DialogTitle>
 
         <DialogContent dividers>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 3,
-            }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {submitError && <Alert severity="error">{submitError}</Alert>}
 
             {/* Employee Information */}
@@ -182,9 +216,7 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: {
-                      maxLength: 30,
-                    },
+                    htmlInput: { maxLength: 30 },
                   }}
                 />
 
@@ -198,9 +230,7 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: {
-                      maxLength: 100,
-                    },
+                    htmlInput: { maxLength: 100 },
                   }}
                 />
 
@@ -213,9 +243,7 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: {
-                      maxLength: 100,
-                    },
+                    htmlInput: { maxLength: 100 },
                   }}
                 />
 
@@ -228,9 +256,7 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: {
-                      maxLength: 100,
-                    },
+                    htmlInput: { maxLength: 100 },
                   }}
                 />
 
@@ -287,9 +313,7 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    htmlInput: {
-                      maxLength: 150,
-                    },
+                    htmlInput: { maxLength: 150 },
                   }}
                 />
 
@@ -321,19 +345,27 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    inputLabel: {
-                      shrink: true,
+                    inputLabel: { shrink: true },
+                    htmlInput: {
+                      max: today,
                     },
                   }}
                 />
               </Box>
             </Box>
 
-            {/* Initial Salary */}
+            {/* Salary Information */}
             <Box>
               <Typography variant="subtitle1" fontWeight={600} mb={2}>
-                Initial Salary
+                {isEditMode ? 'Current Salary' : 'Initial Salary'}
               </Typography>
+
+              {isEditMode && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                  Update salary details only when a compensation change is intended. A changed salary will create a new
+                  salary history record.
+                </Typography>
+              )}
 
               <Box
                 sx={{
@@ -392,8 +424,9 @@ function EmployeeFormDialog({
                   fullWidth
                   size="small"
                   slotProps={{
-                    inputLabel: {
-                      shrink: true,
+                    inputLabel: { shrink: true },
+                    htmlInput: {
+                      max: today,
                     },
                   }}
                 />
@@ -408,7 +441,7 @@ function EmployeeFormDialog({
           </Button>
 
           <Button type="submit" variant="contained" disabled={submitting}>
-            {submitting ? 'Creating...' : 'Create Employee'}
+            {submitting ? (isEditMode ? 'Saving...' : 'Creating...') : isEditMode ? 'Save Changes' : 'Create Employee'}
           </Button>
         </DialogActions>
       </Box>

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import type { Employee, EmployeeCreateRequest } from '@/types/employee';
+
 import { Alert, Box, Button, Snackbar, Typography } from '@mui/material';
 
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
@@ -15,9 +17,9 @@ import { useEmployees } from '@/pages/Employees/hooks/useEmployees';
 
 import { getCountries, getDepartments, type ReferenceOption } from '@/api/referenceDataApi';
 
-import { createEmployee } from '@/api/employeeApi';
+import { createEmployee, updateEmployee } from '@/api/employeeApi';
 
-import type { EmployeeCreateRequest } from '@/types/employee';
+type EmployeeFormMode = 'create' | 'edit';
 
 function EmployeesPage() {
   const {
@@ -45,15 +47,21 @@ function EmployeesPage() {
 
   const [isEmployeeDetailsDialogOpen, setIsEmployeeDetailsDialogOpen] = useState(false);
 
-  // Employee creation dialog state
-  const [isCreateEmployeeDialogOpen, setIsCreateEmployeeDialogOpen] = useState(false);
+  // Employee form dialog state
+  const [employeeFormMode, setEmployeeFormMode] = useState<EmployeeFormMode>('create');
 
-  const [isCreatingEmployee, setIsCreatingEmployee] = useState(false);
+  const [employeeBeingEdited, setEmployeeBeingEdited] = useState<Employee | null>(null);
 
-  const [createEmployeeError, setCreateEmployeeError] = useState<string | null>(null);
+  const [isEmployeeFormDialogOpen, setIsEmployeeFormDialogOpen] = useState(false);
+
+  const [isSavingEmployee, setIsSavingEmployee] = useState(false);
+
+  const [employeeFormError, setEmployeeFormError] = useState<string | null>(null);
 
   // Success notification state
-  const [isCreateSuccessSnackbarOpen, setIsCreateSuccessSnackbarOpen] = useState(false);
+  const [isSuccessSnackbarOpen, setIsSuccessSnackbarOpen] = useState(false);
+
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Load reference data
   useEffect(() => {
@@ -86,7 +94,7 @@ function EmployeesPage() {
     };
   }, []);
 
-  // Employee details dialog
+  // View employee
   const onViewEmployee = (employeeId: number) => {
     setSelectedEmployeeId(employeeId);
     setIsEmployeeDetailsDialogOpen(true);
@@ -97,38 +105,60 @@ function EmployeesPage() {
     setSelectedEmployeeId(null);
   };
 
-  // Employee creation dialog
+  // Add employee
   const onClickAddEmployee = () => {
-    setCreateEmployeeError(null);
-    setIsCreateEmployeeDialogOpen(true);
+    setEmployeeFormMode('create');
+    setEmployeeBeingEdited(null);
+    setEmployeeFormError(null);
+    setIsEmployeeFormDialogOpen(true);
   };
 
-  const onCloseCreateEmployeeDialog = () => {
-    if (isCreatingEmployee) {
+  // Edit employee
+  const onClickEditEmployee = (employee: Employee) => {
+    setEmployeeFormMode('edit');
+    setEmployeeBeingEdited(employee);
+    setEmployeeFormError(null);
+    setIsEmployeeFormDialogOpen(true);
+  };
+
+  // Close employee form
+  const onCloseEmployeeFormDialog = () => {
+    if (isSavingEmployee) {
       return;
     }
 
-    setIsCreateEmployeeDialogOpen(false);
-    setCreateEmployeeError(null);
+    setIsEmployeeFormDialogOpen(false);
+    setEmployeeBeingEdited(null);
+    setEmployeeFormError(null);
   };
 
-  // Create employee
-  const onSubmitCreateEmployee = async (request: EmployeeCreateRequest) => {
+  // Create or update employee
+  const onSubmitEmployee = async (request: EmployeeCreateRequest) => {
     try {
-      setIsCreatingEmployee(true);
-      setCreateEmployeeError(null);
+      setIsSavingEmployee(true);
+      setEmployeeFormError(null);
 
-      await createEmployee(request);
+      if (employeeFormMode === 'create') {
+        await createEmployee(request);
+        setSuccessMessage('Employee created successfully!');
+      } else {
+        if (!employeeBeingEdited) {
+          throw new Error('No employee selected for editing.');
+        }
 
-      setIsCreateEmployeeDialogOpen(false);
+        await updateEmployee(employeeBeingEdited.id, request);
+        setSuccessMessage('Employee updated successfully!');
+      }
 
-      // Refresh employee listing.
+      setIsEmployeeFormDialogOpen(false);
+      setEmployeeBeingEdited(null);
+
+      // Refresh the current employee listing.
       refresh();
 
-      // Display success notification.
-      setIsCreateSuccessSnackbarOpen(true);
+      setIsSuccessSnackbarOpen(true);
     } catch (error: unknown) {
-      let message = 'Failed to create employee. Please try again.';
+      let message = `Failed to ${employeeFormMode === 'create' ? 'create' : 'update'} employee. Please try again.`;
 
       if (axios.isAxiosError<{ message?: string }>(error)) {
         message = error.response?.data?.message ?? error.message ?? message;
@@ -136,9 +166,9 @@ function EmployeesPage() {
         message = error.message;
       }
 
-      setCreateEmployeeError(message);
+      setEmployeeFormError(message);
     } finally {
-      setIsCreatingEmployee(false);
+      setIsSavingEmployee(false);
     }
   };
 
@@ -156,10 +186,7 @@ function EmployeesPage() {
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: {
-            xs: 'flex-start',
-            sm: 'center',
-          },
+          alignItems: { xs: 'flex-start', sm: 'center' },
           flexWrap: 'wrap',
           gap: 2,
         }}>
@@ -223,6 +250,7 @@ function EmployeesPage() {
         onPageSizeChange={changePageSize}
         onSortChange={changeSort}
         onViewEmployee={onViewEmployee}
+        onEditEmployee={onClickEditEmployee}
       />
 
       {/* Employee details dialog */}
@@ -232,24 +260,26 @@ function EmployeesPage() {
         onClose={onCloseEmployeeDetailsDialog}
       />
 
-      {/* Employee creation dialog */}
+      {/* Shared create/edit employee dialog */}
       <EmployeeFormDialog
-        open={isCreateEmployeeDialogOpen}
+        open={isEmployeeFormDialogOpen}
+        mode={employeeFormMode}
+        employee={employeeBeingEdited}
         countries={countries}
         departments={departments}
-        submitting={isCreatingEmployee}
-        submitError={createEmployeeError}
-        onClose={onCloseCreateEmployeeDialog}
-        onSubmit={onSubmitCreateEmployee}
+        submitting={isSavingEmployee}
+        submitError={employeeFormError}
+        onClose={onCloseEmployeeFormDialog}
+        onSubmit={onSubmitEmployee}
       />
 
       {/* Success notification */}
       <Snackbar
-        open={isCreateSuccessSnackbarOpen}
+        open={isSuccessSnackbarOpen}
         autoHideDuration={4000}
         onClose={(_, reason) => {
           if (reason !== 'clickaway') {
-            setIsCreateSuccessSnackbarOpen(false);
+            setIsSuccessSnackbarOpen(false);
           }
         }}
         anchorOrigin={{
@@ -257,11 +287,11 @@ function EmployeesPage() {
           horizontal: 'right',
         }}>
         <Alert
-          onClose={() => setIsCreateSuccessSnackbarOpen(false)}
+          onClose={() => setIsSuccessSnackbarOpen(false)}
           severity="success"
           variant="filled"
           sx={{ width: '100%' }}>
-          Employee created successfully!
+          {successMessage}
         </Alert>
       </Snackbar>
     </Box>

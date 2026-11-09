@@ -1,0 +1,7 @@
+{
+  "spec": ["src/**/*.test.ts", "src/**/*.test.tsx"],
+  "extension": ["ts", "tsx"],
+  "require": ["global-jsdom/register"],
+  "timeout": 5000,
+  "reporter": "spec"
+}

@@ -46,7 +46,7 @@ function EmployeeTable({
   onPageSizeChange,
   onSortChange,
   onViewEmployee,
-  onEditEmployee
+  onEditEmployee,
 }: EmployeeTableProps) {
   const [sortField, sortDirectionValue] = sort.split(',');
 
